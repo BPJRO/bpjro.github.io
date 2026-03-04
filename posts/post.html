@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>文章 - 🤗BPJRO的个人主页·续</title>
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <a href="../index.html" class="brand-name">BPJRO</a>
+        </div>
+        <nav class="nav">
+          <a href="../index.html#about">关于我</a>
+          <a href="../index.html#updates">近期情况</a>
+          <a href="../index.html#posts">文章</a>
+          <a href="../index.html#contact">联系方式</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-section">
+        <div class="container">
+          <article class="card">
+            <p id="post-date" class="post-date muted"></p>
+            <h1 id="post-title" class="post-title">文章标题</h1>
+            <div id="post-content" class="post-body"></div>
+
+            <div
+              style="
+                margin-top: 32px;
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+              "
+            >
+              <a href="../index.html" class="btn btn-ghost small"> 返回主页 </a>
+              <a href="index.html" class="btn btn-ghost small"> 返回文章列表 </a>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p class="muted small-text">
+          © <span id="footer-year">2026</span> BPJRO. All rights reserved.
+        </p>
+      </div>
+    </footer>
+
+    <script src="../data/site-data.js"></script>
+    <script>
+      (function () {
+        const yearEl = document.getElementById("footer-year");
+        if (yearEl) {
+          yearEl.textContent = new Date().getFullYear().toString();
+        }
+
+        function getQueryParam(name) {
+          const params = new URLSearchParams(window.location.search);
+          return params.get(name);
+        }
+
+        function simpleMarkdownToHtml(markdown) {
+          if (!markdown) return "";
+          const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+          const htmlLines = [];
+          let inList = false;
+
+          function closeList() {
+            if (inList) {
+              htmlLines.push("</ul>");
+              inList = false;
+            }
+          }
+
+          lines.forEach((rawLine) => {
+            const line = rawLine.trimEnd();
+            if (!line.trim()) {
+              closeList();
+              return;
+            }
+
+            // 标题
+            const hMatch = line.match(/^(#{1,6})\s+(.*)$/);
+            if (hMatch) {
+              closeList();
+              const level = hMatch[1].length;
+              const text = hMatch[2];
+              htmlLines.push(
+                "<h" + level + ">" + inlineFormat(text) + "</h" + level + ">"
+              );
+              return;
+            }
+
+            // 无序列表
+            const listMatch = line.match(/^[-*]\s+(.*)$/);
+            if (listMatch) {
+              if (!inList) {
+                inList = true;
+                htmlLines.push("<ul>");
+              }
+              htmlLines.push(
+                "<li>" + inlineFormat(listMatch[1]) + "</li>"
+              );
+              return;
+            }
+
+            // 普通段落
+            closeList();
+            htmlLines.push("<p>" + inlineFormat(line) + "</p>");
+          });
+
+          closeList();
+          return htmlLines.join("\n");
+        }
+
+        function inlineFormat(text) {
+          if (!text) return "";
+          // 粗体 **text**
+          let result = text.replace(
+            /\*\*(.+?)\*\*/g,
+            "<strong>$1</strong>"
+          );
+          // 斜体 _text_
+          result = result.replace(/_(.+?)_/g, "<em>$1</em>");
+          // 行内代码 `code`
+          result = result.replace(/`([^`]+)`/g, "<code>$1</code>");
+          return result;
+        }
+
+        function loadPost() {
+          if (!window.SITE_DATA) return;
+          const { posts } = window.SITE_DATA;
+          const slug = getQueryParam("slug");
+          const post =
+            Array.isArray(posts) && slug
+              ? posts.find((p) => p.slug === slug)
+              : null;
+
+          const titleEl = document.getElementById("post-title");
+          const dateEl = document.getElementById("post-date");
+          const contentEl = document.getElementById("post-content");
+
+          if (!slug || !post) {
+            if (titleEl) titleEl.textContent = "未找到对应文章";
+            if (dateEl) dateEl.textContent = "";
+            if (contentEl) {
+              contentEl.innerHTML =
+                "<p class='muted'>请检查链接是否正确，或稍后再试。</p>";
+            }
+            return;
+          }
+
+          if (titleEl) titleEl.textContent = post.title || slug;
+          if (dateEl) dateEl.textContent = post.date || "";
+
+          const mdPath = "md/" + slug + ".md";
+          fetch(mdPath)
+            .then((res) => (res.ok ? res.text() : ""))
+            .then((md) => {
+              if (!contentEl) return;
+              if (!md) {
+                contentEl.innerHTML =
+                  "<p class='muted'>文章内容尚未准备好，请稍后再试。</p>";
+                return;
+              }
+              contentEl.innerHTML = simpleMarkdownToHtml(md);
+            })
+            .catch(() => {
+              if (!contentEl) return;
+              contentEl.innerHTML =
+                "<p class='muted'>加载文章内容时出现问题，请稍后再试。</p>";
+            });
+        }
+
+        loadPost();
+      })();
+    </script>
+  </body>
+</html>
+

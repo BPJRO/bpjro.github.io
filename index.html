@@ -1,19 +1,299 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>🤗BPJRO的个人主页·续</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <span class="brand-name">Your Name</span>
+        </div>
+        <nav class="nav">
+          <a href="#about">关于我</a>
+          <a href="#updates">近期情况</a>
+          <a href="#posts">文章</a>
+          <a href="#contact">联系方式</a>
+        </nav>
+      </div>
+    </header>
 
-<html>
+    <main>
+      <!-- 关于我 -->
+      <section id="about" class="page-section">
+        <div class="container about-layout">
+          <div class="about-text">
+            <p class="section-kicker">ABOUT</p>
+            <h1 class="about-name">你的姓名</h1>
+            <p class="about-title muted">你的当前身份 / 角色 · 所在城市</p>
+            <p class="about-bio">
+              这里是一句简短的自我介绍示例。后续会从数据文件中渲染真实内容。
+            </p>
+          </div>
+          <div class="about-avatar">
+            <div class="avatar-circle">
+              <span class="avatar-initial">Y</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-<head>
+      <!-- 近期情况 -->
+      <section id="updates" class="page-section section-alt">
+        <div class="container">
+          <h2 class="section-title">近期情况</h2>
 
-<meta charset="utf-8">
+          <div class="updates-grid">
+            <!-- 极简列表 -->
+            <div class="card updates-highlights">
+              <h3 class="sub-title">最近在做</h3>
+              <ul class="highlights-list">
+                <li>这里是一个示例条目，用于展示当前关注的方向。</li>
+                <li>后续会从数据文件 recentHighlights 中渲染真实内容。</li>
+                <li>可以随时在数据文件里增删这些条目。</li>
+              </ul>
+            </div>
 
-<title>test</title>
+            <!-- 时间线 -->
+            <div class="card updates-timeline-card">
+              <h3 class="sub-title">时间线</h3>
+              <div class="timeline">
+                <div class="timeline-item">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-date muted">2026-03-04</div>
+                    <div class="timeline-text">
+                      这里是一条示例时间线事件，后续由数据渲染替换。
+                    </div>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-date muted">2026-02-20</div>
+                    <div class="timeline-text">
+                      第二条示例事件，用于展示布局效果。
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-</head>
+      <!-- 最近文章 -->
+      <section id="posts" class="page-section">
+        <div class="container">
+          <div class="section-header-row">
+            <h2 class="section-title">最近文章</h2>
+            <a href="posts/index.html" class="btn btn-ghost small">
+              查看全部
+            </a>
+          </div>
 
-<body>
+          <div class="posts-grid">
+            <!-- 占位卡片：稍后由 JS 渲染真实数据 -->
+            <article class="card post-card">
+              <div class="post-date muted">2026-03-01</div>
+              <h3 class="post-title">示例文章标题</h3>
+              <p class="post-summary">
+                这是一段示例摘要，用于展示卡片排版效果。实际内容将从数据文件中注入。
+              </p>
+              <a href="posts/example-post.html" class="post-link">
+                阅读更多
+              </a>
+            </article>
+          </div>
+        </div>
+      </section>
 
-<p>施工中</p>
+      <!-- 联系方式 -->
+      <section id="contact" class="page-section section-alt">
+        <div class="container">
+          <h2 class="section-title">联系方式</h2>
+          <div class="contact-grid">
+            <div class="card contact-item">
+              <div class="contact-label">Mail</div>
+              <a href="mailto:bpjro@outlook.com" class="contact-value">
+                bpjro@outlook.com
+              </a>
+            </div>
+            <div class="card contact-item">
+              <div class="contact-label">GitHub</div>
+              <a href="https://github.com/bpjro" class="contact-value">
+                bpjro
+              </a>
+            </div>
+            <div class="card contact-item">
+              <div class="contact-label">Zhihu</div>
+              <a href="https://www.zhihu.com/people/A-Side" class="contact-value">
+                这里躺着一个人
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
 
-</body>
+    <footer class="site-footer">
+      <div class="container">
+        <p class="muted small-text">
+          © <span id="footer-year">2026</span> BPJRO. All rights reserved.
+        </p>
+      </div>
+    </footer>
 
+    <script src="data/site-data.js"></script>
+    <script>
+      (function () {
+        if (!window.SITE_DATA) return;
+        const { profile, recentHighlights, timelineEvents, posts } =
+          window.SITE_DATA;
+
+        // 关于我
+        const nameEl = document.querySelector(".about-name");
+        const titleEl = document.querySelector(".about-title");
+        const bioEl = document.querySelector(".about-bio");
+        const brandNameEl = document.querySelector(".brand-name");
+        const avatarInitialEl = document.querySelector(".avatar-initial");
+        const avatarCircleEl = document.querySelector(".avatar-circle");
+
+        function getAvatarInitial(name) {
+          if (!name) return null;
+          const trimmed = name.trim();
+          if (!trimmed) return null;
+          const firstChar = trimmed.charAt(0);
+          // 简单判断：如果是中文字符区间，直接用首汉字
+          if (firstChar >= "\u4e00" && firstChar <= "\u9fff") {
+            return firstChar;
+          }
+          // 如果是英文字母，用第一个单词的首字母
+          if (/^[A-Za-z]/.test(firstChar)) {
+            const firstWord = trimmed.split(/\s+/)[0];
+            return firstWord.charAt(0).toUpperCase();
+          }
+          // 其他情况不显示字母，交给占位图标
+          return null;
+        }
+
+        if (profile) {
+          if (nameEl) nameEl.textContent = profile.name || "你的姓名";
+          if (brandNameEl) brandNameEl.textContent = profile.name || "Your Name";
+          if (titleEl) {
+            const title = profile.title || "你的当前身份 / 角色";
+            const location = profile.location || "所在城市";
+            titleEl.textContent = `${title} · ${location}`;
+          }
+          if (bioEl && profile.bio) {
+            bioEl.textContent = profile.bio;
+          }
+
+          if (avatarInitialEl && avatarCircleEl) {
+            const initial = getAvatarInitial(profile.name);
+            if (initial) {
+              avatarCircleEl.classList.remove("avatar-empty");
+              avatarInitialEl.textContent = initial;
+            } else {
+              avatarCircleEl.classList.add("avatar-empty");
+            }
+          }
+        }
+
+        // 页脚年份
+        const yearEl = document.getElementById("footer-year");
+        if (yearEl) {
+          yearEl.textContent = new Date().getFullYear().toString();
+        }
+
+        // 近期情况：极简列表
+        const highlightsList = document.querySelector(".highlights-list");
+        if (highlightsList && Array.isArray(recentHighlights)) {
+          highlightsList.innerHTML = "";
+          recentHighlights.forEach((item) => {
+            const li = document.createElement("li");
+            li.textContent = item.text || "";
+            highlightsList.appendChild(li);
+          });
+        }
+
+        // 近期情况：时间线
+        const timelineEl = document.querySelector(".timeline");
+        if (timelineEl && Array.isArray(timelineEvents)) {
+          timelineEl.innerHTML = "";
+          timelineEvents.forEach((event) => {
+            const item = document.createElement("div");
+            item.className = "timeline-item";
+
+            const dot = document.createElement("div");
+            dot.className = "timeline-dot";
+
+            const content = document.createElement("div");
+            content.className = "timeline-content";
+
+            const dateEl = document.createElement("div");
+            dateEl.className = "timeline-date muted";
+            dateEl.textContent = event.date || "";
+
+            const textEl = document.createElement("div");
+            textEl.className = "timeline-text";
+            textEl.textContent = event.text || "";
+
+            content.appendChild(dateEl);
+            content.appendChild(textEl);
+            item.appendChild(dot);
+            item.appendChild(content);
+            timelineEl.appendChild(item);
+          });
+        }
+
+        // 最近文章：取最近三篇
+        const postsGrid = document.querySelector(".posts-grid");
+        if (postsGrid && Array.isArray(posts) && posts.length > 0) {
+          postsGrid.innerHTML = "";
+
+          const sortedPosts = posts.slice().sort((a, b) => {
+            if (!a.date || !b.date) return 0;
+            return new Date(b.date) - new Date(a.date);
+          });
+
+          sortedPosts.slice(0, 3).forEach((post) => {
+            const article = document.createElement("article");
+            article.className = "card post-card";
+
+            const dateEl = document.createElement("div");
+            dateEl.className = "post-date muted";
+            dateEl.textContent = post.date || "";
+
+            const titleEl = document.createElement("h3");
+            titleEl.className = "post-title";
+            titleEl.textContent = post.title || "未命名文章";
+
+            const summaryEl = document.createElement("p");
+            summaryEl.className = "post-summary";
+            summaryEl.textContent =
+              post.summary || "这篇文章暂时没有摘要描述。";
+
+            const linkEl = document.createElement("a");
+            linkEl.className = "post-link";
+            linkEl.textContent = "阅读更多";
+            linkEl.href = post.slug
+              ? `posts/post.html?slug=${encodeURIComponent(post.slug)}`
+              : "javascript:void(0)";
+
+            article.appendChild(dateEl);
+            article.appendChild(titleEl);
+            article.appendChild(summaryEl);
+            article.appendChild(linkEl);
+
+            postsGrid.appendChild(article);
+          });
+        }
+      })();
+    </script>
+  </body>
 </html>

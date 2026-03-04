@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>全部文章 - 🤗BPJRO的个人主页·续</title>
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <a href="../index.html" class="brand-name">BPJRO</a>
+        </div>
+        <nav class="nav">
+          <a href="../index.html#about">关于我</a>
+          <a href="../index.html#updates">近期情况</a>
+          <a href="../index.html#posts">文章</a>
+          <a href="../index.html#contact">联系方式</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-section">
+        <div class="container">
+          <div class="section-header-row">
+            <h1 class="section-title">全部文章</h1>
+            <a href="../index.html" class="btn btn-ghost small"> 返回主页 </a>
+          </div>
+
+          <div id="posts-list" class="posts-grid">
+            <!-- 将由脚本从数据文件渲染 -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p class="muted small-text">
+          © <span id="footer-year">2026</span> BPJRO. All rights reserved.
+        </p>
+      </div>
+    </footer>
+
+    <script src="../data/site-data.js"></script>
+    <script>
+      (function () {
+        if (!window.SITE_DATA) return;
+        const { posts } = window.SITE_DATA;
+
+        const yearEl = document.getElementById("footer-year");
+        if (yearEl) {
+          yearEl.textContent = new Date().getFullYear().toString();
+        }
+
+        const listEl = document.getElementById("posts-list");
+        if (!listEl || !Array.isArray(posts) || posts.length === 0) return;
+
+        const sortedPosts = posts.slice().sort((a, b) => {
+          if (!a.date || !b.date) return 0;
+          return new Date(b.date) - new Date(a.date);
+        });
+
+        sortedPosts.forEach((post) => {
+          const article = document.createElement("article");
+          article.className = "card post-card";
+
+          const dateEl = document.createElement("div");
+          dateEl.className = "post-date muted";
+          dateEl.textContent = post.date || "";
+
+          const titleEl = document.createElement("h2");
+          titleEl.className = "post-title";
+          titleEl.textContent = post.title || "未命名文章";
+
+          const summaryEl = document.createElement("p");
+          summaryEl.className = "post-summary";
+          summaryEl.textContent =
+            post.summary || "这篇文章暂时没有摘要描述。";
+
+          const linkEl = document.createElement("a");
+          linkEl.className = "post-link";
+          linkEl.textContent = "阅读更多";
+          linkEl.href = post.slug
+            ? `post.html?slug=${encodeURIComponent(post.slug)}`
+            : "javascript:void(0)";
+
+          article.appendChild(dateEl);
+          article.appendChild(titleEl);
+          article.appendChild(summaryEl);
+          article.appendChild(linkEl);
+
+          listEl.appendChild(article);
+        });
+      })();
+    </script>
+  </body>
+</html>
+
