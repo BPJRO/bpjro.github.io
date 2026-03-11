@@ -15,6 +15,7 @@ const recentHighlights = [
 
 // 近期情况：时间线（按时间倒序书写更直观）
 const timelineEvents = [
+  { date: "2026-03-11", text: "使用OpenCode + MiMo V2 Flash Free优化此主页" },
   { date: "2026-03-04", text: "使用Cursor搭建此主页并发布在Github Pages上" },
   { date: "2025-12-01", text: "第一份零工结束" },
   { date: "2024-09-01", text: "晋升成为万金油" },
@@ -25,7 +26,7 @@ const timelineEvents = [
 const posts = [
   {
     slug: "post20260304",
-    title: " ",
+    title: "主页重建纪念",
     date: "2026-03-04",
     summary: "主页重建纪念的文章。"
   },
@@ -33,7 +34,13 @@ const posts = [
     slug: "post2",
     title: "施工中",
     date: "2026-03-04",
-    summary: "施工中的文章。打算回顾一下2017年以来有关个人主页的故事。"
+    summary: "施工中的文章。打算回顾一下2017年以来有关个人主页的故事"
+  },
+  {
+    slug: "post20260311",
+    title: "3月11日杂记",
+    date: "2026-03-11",
+    summary: "随便写了点"
   }
 ];
 
