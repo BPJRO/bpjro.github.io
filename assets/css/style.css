@@ -156,6 +156,7 @@ a:hover {
 
 .brand-name {
   font-size: 0.95rem;
+  color: var(--color-accent);
 }
 
 .nav {
@@ -388,8 +389,18 @@ main {
 }
 
 .post-title {
-  font-size: 1.1rem;
+  font-size: 1.5rem; /* 默认标题字号 */
+  margin: 0 0 16px;
+}
+
+.post-card .post-title {
+  font-size: 1rem; /* 主页卡片标题调小 */
   margin: 0;
+}
+
+#post-title {
+  font-size: 2rem; /* 文章页面标题保持大字号 */
+  margin: 0 0 16px;
 }
 
 .post-summary {
@@ -399,6 +410,55 @@ main {
 
 .post-link {
   font-size: 0.9rem;
+}
+
+/* 文章页面 */
+.post-actions {
+  margin-top: 32px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.post-body h1 {
+  font-size: 1.8rem; /* Markdown解析的h1字号 */
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.post-body h2 {
+  font-size: 1.4rem;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+}
+
+.post-body p {
+  margin-bottom: 1em;
+}
+
+.post-body blockquote {
+  border-left: 4px solid var(--color-accent);
+  padding-left: 16px;
+  margin-left: 0;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.post-body pre {
+  background-color: #f4f4f4;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: 1em;
+}
+
+.post-body code {
+  font-family: "Menlo", "Monaco", "Courier New", monospace;
+  font-size: 0.9em;
+}
+
+.post-body a {
+  text-decoration: underline;
 }
 
 /* 联系方式 */
@@ -440,7 +500,7 @@ main {
 /* 响应式调整 */
 @media (max-width: 768px) {
   .header-inner {
-    padding: 10px 0;
+    padding: 10px 16px;
   }
 
   .nav {

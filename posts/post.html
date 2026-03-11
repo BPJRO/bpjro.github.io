@@ -30,14 +30,7 @@
             <h1 id="post-title" class="post-title">文章标题</h1>
             <div id="post-content" class="post-body"></div>
 
-            <div
-              style="
-                margin-top: 32px;
-                display: flex;
-                gap: 12px;
-                flex-wrap: wrap;
-              "
-            >
+            <div class="post-actions">
               <a href="../index.html" class="btn btn-ghost small"> 返回主页 </a>
               <a href="index.html" class="btn btn-ghost small"> 返回文章列表 </a>
             </div>
@@ -72,6 +65,8 @@
           const lines = markdown.replace(/\r\n/g, "\n").split("\n");
           const htmlLines = [];
           let inList = false;
+          let inCodeBlock = false;
+          let codeBlockContent = [];
 
           function closeList() {
             if (inList) {
@@ -80,58 +75,125 @@
             }
           }
 
-          lines.forEach((rawLine) => {
-            const line = rawLine.trimEnd();
-            if (!line.trim()) {
+          function closeCodeBlock() {
+            if (inCodeBlock) {
+              const code = codeBlockContent.join("\n");
+              htmlLines.push(`<pre><code>${escapeHtml(code)}</code></pre>`);
+              inCodeBlock = false;
+              codeBlockContent = [];
+            }
+          }
+
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmedLine = line.trim();
+
+            // 代码块处理
+            if (trimmedLine.startsWith("```")) {
+              if (!inCodeBlock) {
+                closeList();
+                closeCodeBlock(); // just in case
+                inCodeBlock = true;
+              } else {
+                closeCodeBlock();
+              }
+              continue;
+            }
+
+            if (inCodeBlock) {
+              codeBlockContent.push(line);
+              continue;
+            }
+
+            if (!trimmedLine) {
               closeList();
-              return;
+              continue;
+            }
+
+            // 引用块
+            if (trimmedLine.startsWith("> ")) {
+              closeList();
+              const quoteText = trimmedLine.substring(2);
+              htmlLines.push(`<blockquote>${inlineFormat(quoteText)}</blockquote>`);
+              continue;
             }
 
             // 标题
-            const hMatch = line.match(/^(#{1,6})\s+(.*)$/);
+            const hMatch = trimmedLine.match(/^(#{1,6})\s+(.*)$/);
             if (hMatch) {
               closeList();
               const level = hMatch[1].length;
               const text = hMatch[2];
               htmlLines.push(
-                "<h" + level + ">" + inlineFormat(text) + "</h" + level + ">"
+                `<h${level}>${inlineFormat(text)}</h${level}>`
               );
-              return;
+              continue;
             }
 
             // 无序列表
-            const listMatch = line.match(/^[-*]\s+(.*)$/);
+            const listMatch = trimmedLine.match(/^[-*]\s+(.*)$/);
             if (listMatch) {
               if (!inList) {
-                inList = true;
+                closeList();
                 htmlLines.push("<ul>");
+                inList = true;
               }
               htmlLines.push(
-                "<li>" + inlineFormat(listMatch[1]) + "</li>"
+                `<li>${inlineFormat(listMatch[1])}</li>`
               );
-              return;
+              continue;
             }
 
             // 普通段落
             closeList();
-            htmlLines.push("<p>" + inlineFormat(line) + "</p>");
-          });
+            htmlLines.push(`<p>${inlineFormat(trimmedLine)}</p>`);
+          }
 
           closeList();
+          closeCodeBlock();
           return htmlLines.join("\n");
+        }
+
+        function escapeHtml(text) {
+          const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+          };
+          return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         }
 
         function inlineFormat(text) {
           if (!text) return "";
+          let result = text;
+
+          // 图片 ![alt](src)
+          result = result.replace(
+            /!\[([^\]]*)\]\(([^)]+)\)/g,
+            '<img src="$2" alt="$1" style="max-width:100%; height:auto;">'
+          );
+
+          // 链接 [text](url)
+          result = result.replace(
+            /\[([^\]]+)\]\(([^)]+)\)/g,
+            '<a href="$2" target="_blank" rel="noopener">$1</a>'
+          );
+
           // 粗体 **text**
-          let result = text.replace(
+          result = result.replace(
             /\*\*(.+?)\*\*/g,
             "<strong>$1</strong>"
           );
-          // 斜体 _text_
-          result = result.replace(/_(.+?)_/g, "<em>$1</em>");
+
+          // 斜体 _text_ (只在非粗体上下文中匹配？暂简单处理)
+          // 避免匹配到 **_text_** 中的 _，这里简单替换
+          result = result.replace(/(?<!\*)_(.+?)_(?!\*)/g, "<em>$1</em>");
+
           // 行内代码 `code`
           result = result.replace(/`([^`]+)`/g, "<code>$1</code>");
+
           return result;
         }
 
