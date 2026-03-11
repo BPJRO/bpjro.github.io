@@ -181,15 +181,29 @@
             '<a href="$2" target="_blank" rel="noopener">$1</a>'
           );
 
+          // 粗体斜体 ***text***
+          result = result.replace(
+            /\*\*\*(.+?)\*\*\*/g,
+            "<strong><em>$1</em></strong>"
+          );
+
           // 粗体 **text**
           result = result.replace(
             /\*\*(.+?)\*\*/g,
             "<strong>$1</strong>"
           );
 
-          // 斜体 _text_ (只在非粗体上下文中匹配？暂简单处理)
-          // 避免匹配到 **_text_** 中的 _，这里简单替换
-          result = result.replace(/(?<!\*)_(.+?)_(?!\*)/g, "<em>$1</em>");
+          // 星号斜体 *text*
+          result = result.replace(
+            /\*(.+?)\*/g,
+            "<em>$1</em>"
+          );
+
+          // 下划线斜体 _text_
+          result = result.replace(
+            /_(.+?)_/g,
+            "<em>$1</em>"
+          );
 
           // 行内代码 `code`
           result = result.replace(/`([^`]+)`/g, "<code>$1</code>");

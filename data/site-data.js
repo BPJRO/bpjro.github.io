@@ -41,6 +41,12 @@ const posts = [
     title: "3月11日杂记",
     date: "2026-03-11",
     summary: "随便写了点"
+  },
+  {
+    slug: "md_format_test",
+    title: "Markdown 格式测试",
+    date: "2026-03-11",
+    summary: "测试新的Markdown解析功能"
   }
 ];
 
