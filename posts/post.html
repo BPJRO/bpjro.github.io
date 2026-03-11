@@ -64,16 +64,9 @@
           if (!markdown) return "";
           const lines = markdown.replace(/\r\n/g, "\n").split("\n");
           const htmlLines = [];
-          let inList = false;
           let inCodeBlock = false;
           let codeBlockContent = [];
-
-          function closeList() {
-            if (inList) {
-              htmlLines.push("</ul>");
-              inList = false;
-            }
-          }
+          let listLevelStack = []; // 用于跟踪嵌套列表层级
 
           function closeCodeBlock() {
             if (inCodeBlock) {
@@ -84,6 +77,13 @@
             }
           }
 
+          function closeListsUntilLevel(targetLevel) {
+            while (listLevelStack.length > 0 && listLevelStack[listLevelStack.length - 1] >= targetLevel) {
+              htmlLines.push("</ul>");
+              listLevelStack.pop();
+            }
+          }
+
           for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
             const trimmedLine = line.trim();
@@ -91,7 +91,7 @@
             // 代码块处理
             if (trimmedLine.startsWith("```")) {
               if (!inCodeBlock) {
-                closeList();
+                closeListsUntilLevel(0); // 关闭所有列表
                 closeCodeBlock(); // just in case
                 inCodeBlock = true;
               } else {
@@ -106,13 +106,13 @@
             }
 
             if (!trimmedLine) {
-              closeList();
+              closeListsUntilLevel(0); // 空行关闭所有列表
               continue;
             }
 
             // 引用块
             if (trimmedLine.startsWith("> ")) {
-              closeList();
+              closeListsUntilLevel(0);
               const quoteText = trimmedLine.substring(2);
               htmlLines.push(`<blockquote>${inlineFormat(quoteText)}</blockquote>`);
               continue;
@@ -121,7 +121,7 @@
             // 标题
             const hMatch = trimmedLine.match(/^(#{1,6})\s+(.*)$/);
             if (hMatch) {
-              closeList();
+              closeListsUntilLevel(0);
               const level = hMatch[1].length;
               const text = hMatch[2];
               htmlLines.push(
@@ -130,26 +130,39 @@
               continue;
             }
 
-            // 无序列表
-            const listMatch = trimmedLine.match(/^[-*]\s+(.*)$/);
+            // 无序列表（支持缩进）
+            const listMatch = line.match(/^(\s*)([-*])\s+(.*)$/);
             if (listMatch) {
-              if (!inList) {
-                closeList();
+              const indent = listMatch[1];
+              const listItemText = listMatch[3];
+              
+              // 计算列表层级：每2个空格为一个层级
+              const indentLevel = Math.floor(indent.length / 2) + 1;
+              const currentLevel = listLevelStack.length > 0 ? listLevelStack[listLevelStack.length - 1] : 0;
+              
+              // 如果当前层级大于栈顶层级，需要打开新的<ul>
+              if (indentLevel > currentLevel) {
                 htmlLines.push("<ul>");
-                inList = true;
+                listLevelStack.push(indentLevel);
+              } 
+              // 如果当前层级小于栈顶层级，需要关闭一些<ul>
+              else if (indentLevel < currentLevel) {
+                closeListsUntilLevel(indentLevel);
               }
+              // 如果相等，不需要打开或关闭<ul>
+              
               htmlLines.push(
-                `<li>${inlineFormat(listMatch[1])}</li>`
+                `<li>${inlineFormat(listItemText)}</li>`
               );
               continue;
             }
 
             // 普通段落
-            closeList();
+            closeListsUntilLevel(0);
             htmlLines.push(`<p>${inlineFormat(trimmedLine)}</p>`);
           }
 
-          closeList();
+          closeListsUntilLevel(0);
           closeCodeBlock();
           return htmlLines.join("\n");
         }

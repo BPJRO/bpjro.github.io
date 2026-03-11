@@ -453,7 +453,7 @@ main {
 }
 
 .post-body code {
-  font-family: "Menlo", "Monaco", "Courier New", monospace;
+  font-family: Consolas, monospace;
   font-size: 0.9em;
 }
 
