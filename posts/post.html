@@ -78,7 +78,7 @@
           }
 
           function closeListsUntilLevel(targetLevel) {
-            while (listLevelStack.length > 0 && listLevelStack[listLevelStack.length - 1] >= targetLevel) {
+            while (listLevelStack.length > 0 && listLevelStack[listLevelStack.length - 1] > targetLevel) {
               htmlLines.push("</ul>");
               listLevelStack.pop();
             }
