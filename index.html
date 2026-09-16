@@ -11,7 +11,7 @@
       <div class="container header-inner">
         <div class="brand">
           <span class="brand-mark"></span>
-          <span class="brand-name">Your Name</span>
+          <span class="brand-name">BPJRO</span>
         </div>
         <nav class="nav">
           <a href="#about">关于我</a>
@@ -28,10 +28,10 @@
         <div class="container about-layout">
           <div class="about-text">
             <p class="section-kicker">ABOUT</p>
-            <h1 class="about-name">你的姓名</h1>
-            <p class="about-title muted">你的当前身份 / 角色 · 所在城市</p>
+            <h1 class="about-name">BPJRO</h1>
+            <p class="about-title muted">被差别民 · 上海</p>
             <p class="about-bio">
-              这里是一句简短的自我介绍示例。后续会从数据文件中渲染真实内容。
+              真的有人会看自我介绍吗？
             </p>
           </div>
           <div class="about-avatar">
@@ -52,9 +52,7 @@
             <div class="card updates-highlights">
               <h3 class="sub-title">最近在做</h3>
               <ul class="highlights-list">
-                <li>这里是一个示例条目，用于展示当前关注的方向。</li>
-                <li>后续会从数据文件 recentHighlights 中渲染真实内容。</li>
-                <li>可以随时在数据文件里增删这些条目。</li>
+                <!-- 由脚本从数据文件渲染 -->
               </ul>
             </div>
 
@@ -62,24 +60,7 @@
             <div class="card updates-timeline-card">
               <h3 class="sub-title">时间线</h3>
               <div class="timeline">
-                <div class="timeline-item">
-                  <div class="timeline-dot"></div>
-                  <div class="timeline-content">
-                    <div class="timeline-date muted">2026-03-04</div>
-                    <div class="timeline-text">
-                      这里是一条示例时间线事件，后续由数据渲染替换。
-                    </div>
-                  </div>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-dot"></div>
-                  <div class="timeline-content">
-                    <div class="timeline-date muted">2026-02-20</div>
-                    <div class="timeline-text">
-                      第二条示例事件，用于展示布局效果。
-                    </div>
-                  </div>
-                </div>
+                <!-- 由脚本从数据文件渲染 -->
               </div>
             </div>
           </div>
@@ -96,18 +77,8 @@
             </a>
           </div>
 
-          <div class="posts-grid">
-            <!-- 占位卡片：稍后由 JS 渲染真实数据 -->
-            <article class="card post-card">
-              <div class="post-date muted">2026-03-01</div>
-              <h3 class="post-title">示例文章标题</h3>
-              <p class="post-summary">
-                这是一段示例摘要，用于展示卡片排版效果。实际内容将从数据文件中注入。
-              </p>
-              <a href="posts/example-post.html" class="post-link">
-                阅读更多
-              </a>
-            </article>
+          <div class="posts-grid" id="posts-grid">
+            <!-- 由脚本从 md 文件 front matter 自动渲染 -->
           </div>
         </div>
       </section>
@@ -251,46 +222,69 @@
           });
         }
 
-        // 最近文章：取最近三篇
-        const postsGrid = document.querySelector(".posts-grid");
-        if (postsGrid && Array.isArray(posts) && posts.length > 0) {
-          postsGrid.innerHTML = "";
+        // 最近文章：从 md 文件 front matter 自动读取
+        var postsGrid = document.getElementById("posts-grid");
+        var slugs = Array.isArray(posts) ? posts : [];
+        if (postsGrid && slugs.length > 0) {
+          function parseFrontMatter(text) {
+            var result = { meta: {}, body: text };
+            var match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+            if (!match) return result;
+            for (var i = 0; i < match[1].split(/\r?\n/).length; i++) {
+              var line = match[1].split(/\r?\n/)[i];
+              var idx = line.indexOf(":");
+              if (idx === -1) continue;
+              var key = line.slice(0, idx).trim();
+              var val = line.slice(idx + 1).trim();
+              if (key) result.meta[key] = val;
+            }
+            result.body = text.slice(match[0].length);
+            return result;
+          }
 
-          const sortedPosts = posts.slice().sort((a, b) => {
-            if (!a.date || !b.date) return 0;
-            return new Date(b.date) - new Date(a.date);
-          });
+          Promise.all(
+            slugs.map(function (slug) {
+              return fetch("posts/md/" + slug + ".md")
+                .then(function (res) { return res.ok ? res.text() : ""; })
+                .then(function (text) {
+                  if (!text) return null;
+                  var m = parseFrontMatter(text);
+                  return { slug: slug, title: m.meta.title || slug, date: m.meta.date || "", summary: m.meta.summary || "" };
+                })
+                .catch(function () { return null; });
+            })
+          ).then(function (results) {
+            var postsData = results.filter(Boolean).sort(function (a, b) {
+              return new Date(b.date) - new Date(a.date);
+            });
+            postsGrid.innerHTML = "";
+            postsData.slice(0, 3).forEach(function (post) {
+              var article = document.createElement("article");
+              article.className = "card post-card";
 
-          sortedPosts.slice(0, 3).forEach((post) => {
-            const article = document.createElement("article");
-            article.className = "card post-card";
+              var dateDiv = document.createElement("div");
+              dateDiv.className = "post-date muted";
+              dateDiv.textContent = post.date;
 
-            const dateEl = document.createElement("div");
-            dateEl.className = "post-date muted";
-            dateEl.textContent = post.date || "";
+              var titleH3 = document.createElement("h3");
+              titleH3.className = "post-title";
+              titleH3.textContent = post.title;
 
-            const titleEl = document.createElement("h3");
-            titleEl.className = "post-title";
-            titleEl.textContent = post.title || "未命名文章";
+              var summaryP = document.createElement("p");
+              summaryP.className = "post-summary";
+              summaryP.textContent = post.summary || "这篇文章暂时没有摘要描述。";
 
-            const summaryEl = document.createElement("p");
-            summaryEl.className = "post-summary";
-            summaryEl.textContent =
-              post.summary || "这篇文章暂时没有摘要描述。";
+              var linkA = document.createElement("a");
+              linkA.className = "post-link";
+              linkA.textContent = "阅读更多";
+              linkA.href = "posts/post.html?slug=" + encodeURIComponent(post.slug);
 
-            const linkEl = document.createElement("a");
-            linkEl.className = "post-link";
-            linkEl.textContent = "阅读更多";
-            linkEl.href = post.slug
-              ? `posts/post.html?slug=${encodeURIComponent(post.slug)}`
-              : "javascript:void(0)";
-
-            article.appendChild(dateEl);
-            article.appendChild(titleEl);
-            article.appendChild(summaryEl);
-            article.appendChild(linkEl);
-
-            postsGrid.appendChild(article);
+              article.appendChild(dateDiv);
+              article.appendChild(titleH3);
+              article.appendChild(summaryP);
+              article.appendChild(linkA);
+              postsGrid.appendChild(article);
+            });
           });
         }
       })();

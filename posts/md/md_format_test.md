@@ -1,3 +1,9 @@
+---
+title: Markdown 格式测试
+date: 2026-03-11
+summary: 测试新的Markdown解析功能
+---
+
 # Markdown 格式测试
 
 这是测试新解析功能的文档。

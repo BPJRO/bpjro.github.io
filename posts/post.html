@@ -47,7 +47,6 @@
       </div>
     </footer>
 
-    <script src="../data/site-data.js"></script>
     <script>
       (function () {
         const yearEl = document.getElementById("footer-year");
@@ -58,6 +57,23 @@
         function getQueryParam(name) {
           const params = new URLSearchParams(window.location.search);
           return params.get(name);
+        }
+
+        function parseFrontMatter(markdown) {
+          const result = { meta: {}, body: markdown };
+          const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+          if (!match) return result;
+          const yaml = match[1];
+          const lines = yaml.split(/\r?\n/);
+          for (const line of lines) {
+            const idx = line.indexOf(":");
+            if (idx === -1) continue;
+            const key = line.slice(0, idx).trim();
+            const val = line.slice(idx + 1).trim();
+            if (key) result.meta[key] = val;
+          }
+          result.body = markdown.slice(match[0].length);
+          return result;
         }
 
         function simpleMarkdownToHtml(markdown) {
@@ -225,19 +241,12 @@
         }
 
         function loadPost() {
-          if (!window.SITE_DATA) return;
-          const { posts } = window.SITE_DATA;
           const slug = getQueryParam("slug");
-          const post =
-            Array.isArray(posts) && slug
-              ? posts.find((p) => p.slug === slug)
-              : null;
-
           const titleEl = document.getElementById("post-title");
           const dateEl = document.getElementById("post-date");
           const contentEl = document.getElementById("post-content");
 
-          if (!slug || !post) {
+          if (!slug) {
             if (titleEl) titleEl.textContent = "未找到对应文章";
             if (dateEl) dateEl.textContent = "";
             if (contentEl) {
@@ -247,20 +256,22 @@
             return;
           }
 
-          if (titleEl) titleEl.textContent = post.title || slug;
-          if (dateEl) dateEl.textContent = post.date || "";
-
           const mdPath = "md/" + slug + ".md";
           fetch(mdPath)
             .then((res) => (res.ok ? res.text() : ""))
             .then((md) => {
               if (!contentEl) return;
               if (!md) {
+                titleEl.textContent = "未找到对应文章";
                 contentEl.innerHTML =
                   "<p class='muted'>文章内容尚未准备好，请稍后再试。</p>";
                 return;
               }
-              contentEl.innerHTML = simpleMarkdownToHtml(md);
+              const { meta, body } = parseFrontMatter(md);
+              if (titleEl) titleEl.textContent = meta.title || slug;
+              if (dateEl) dateEl.textContent = meta.date || "";
+              document.title = (meta.title || "文章") + " - 🤗BPJRO的个人主页·续";
+              contentEl.innerHTML = simpleMarkdownToHtml(body);
             })
             .catch(() => {
               if (!contentEl) return;
