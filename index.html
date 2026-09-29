@@ -3,17 +3,28 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>🤗BPJRO的个人主页·续</title>
+    <title>BPJRO的个人主页</title>
+    <meta name="description" content="BPJRO 的个人主页：关于我、近期情况、文章与联系方式。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="BPJRO的个人主页" />
+    <meta property="og:description" content="关于我、近期情况、文章与联系方式。" />
+    <meta property="og:locale" content="zh_CN" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title="BPJRO RSS" href="feed.xml" />
     <link rel="stylesheet" href="assets/css/style.css" />
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Person","name":"BPJRO","address":{"@type":"PostalAddress","addressLocality":"上海"},"email":"mailto:bpjro@outlook.com"}
+    </script>
   </head>
   <body>
+    <a class="skip-link" href="#about">跳到正文</a>
     <header class="site-header">
       <div class="container header-inner">
         <div class="brand">
-          <span class="brand-mark"></span>
+          <span class="brand-mark" aria-hidden="true"></span>
           <span class="brand-name">BPJRO</span>
         </div>
-        <nav class="nav">
+        <nav class="nav" aria-label="主导航">
           <a href="#about">关于我</a>
           <a href="#updates">近期情况</a>
           <a href="#posts">文章</a>
@@ -35,8 +46,8 @@
             </p>
           </div>
           <div class="about-avatar">
-            <div class="avatar-circle">
-              <span class="avatar-initial">Y</span>
+            <div class="avatar-circle" aria-hidden="true">
+              <span class="avatar-initial">B</span>
             </div>
           </div>
         </div>
@@ -78,7 +89,8 @@
           </div>
 
           <div class="posts-grid" id="posts-grid">
-            <!-- 由脚本从 md 文件 front matter 自动渲染 -->
+            <!-- 同步渲染（零请求）；noscript 兜底 -->
+            <noscript><p class="muted">启用 JavaScript 后可浏览最近文章，或直接前往 <a href="posts/index.html">全部文章</a>。</p></noscript>
           </div>
         </div>
       </section>
@@ -96,13 +108,13 @@
             </div>
             <div class="card contact-item">
               <div class="contact-label">GitHub</div>
-              <a href="https://github.com/bpjro" class="contact-value">
+              <a href="https://github.com/bpjro" class="contact-value" target="_blank" rel="noopener">
                 bpjro
               </a>
             </div>
             <div class="card contact-item">
               <div class="contact-label">Zhihu</div>
-              <a href="https://www.zhihu.com/people/A-Side" class="contact-value">
+              <a href="https://www.zhihu.com/people/A-Side" class="contact-value" target="_blank" rel="noopener">
                 这里躺着一个人
               </a>
             </div>
@@ -120,100 +132,84 @@
     </footer>
 
     <script src="data/site-data.js"></script>
+    <script src="assets/js/markdown.js"></script>
+    <script src="assets/js/site.js"></script>
     <script>
       (function () {
         if (!window.SITE_DATA) return;
-        const { profile, recentHighlights, timelineEvents, posts } =
-          window.SITE_DATA;
+        var profile = window.SITE_DATA.profile,
+          recentHighlights = window.SITE_DATA.recentHighlights,
+          timelineEvents = window.SITE_DATA.timelineEvents;
 
         // 关于我
-        const nameEl = document.querySelector(".about-name");
-        const titleEl = document.querySelector(".about-title");
-        const bioEl = document.querySelector(".about-bio");
-        const brandNameEl = document.querySelector(".brand-name");
-        const avatarInitialEl = document.querySelector(".avatar-initial");
-        const avatarCircleEl = document.querySelector(".avatar-circle");
+        var nameEl = document.querySelector(".about-name");
+        var titleEl = document.querySelector(".about-title");
+        var bioEl = document.querySelector(".about-bio");
+        var brandNameEl = document.querySelector(".brand-name");
+        var avatarInitialEl = document.querySelector(".avatar-initial");
+        var avatarCircleEl = document.querySelector(".avatar-circle");
 
         function getAvatarInitial(name) {
           if (!name) return null;
-          const trimmed = name.trim();
+          var trimmed = name.trim();
           if (!trimmed) return null;
-          const firstChar = trimmed.charAt(0);
-          // 简单判断：如果是中文字符区间，直接用首汉字
-          if (firstChar >= "\u4e00" && firstChar <= "\u9fff") {
-            return firstChar;
-          }
-          // 如果是英文字母，用第一个单词的首字母
-          if (/^[A-Za-z]/.test(firstChar)) {
-            const firstWord = trimmed.split(/\s+/)[0];
-            return firstWord.charAt(0).toUpperCase();
-          }
-          // 其他情况不显示字母，交给占位图标
+          var firstChar = trimmed.charAt(0);
+          if (firstChar >= "\u4e00" && firstChar <= "\u9fff") return firstChar;
+          if (/^[A-Za-z]/.test(firstChar)) return trimmed.split(/\s+/)[0].charAt(0).toUpperCase();
           return null;
         }
 
         if (profile) {
           if (nameEl) nameEl.textContent = profile.name || "你的姓名";
           if (brandNameEl) brandNameEl.textContent = profile.name || "Your Name";
-          if (titleEl) {
-            const title = profile.title || "你的当前身份 / 角色";
-            const location = profile.location || "所在城市";
-            titleEl.textContent = `${title} · ${location}`;
-          }
-          if (bioEl && profile.bio) {
-            bioEl.textContent = profile.bio;
-          }
-
+          if (titleEl) titleEl.textContent = (profile.title || "你的当前身份 / 角色") + " · " + (profile.location || "所在城市");
+          if (bioEl && profile.bio) bioEl.textContent = profile.bio;
           if (avatarInitialEl && avatarCircleEl) {
-            const initial = getAvatarInitial(profile.name);
-            if (initial) {
-              avatarCircleEl.classList.remove("avatar-empty");
-              avatarInitialEl.textContent = initial;
-            } else {
-              avatarCircleEl.classList.add("avatar-empty");
-            }
+            var initial = getAvatarInitial(profile.name);
+            if (initial) { avatarCircleEl.classList.remove("avatar-empty"); avatarInitialEl.textContent = initial; }
+            else avatarCircleEl.classList.add("avatar-empty");
           }
         }
 
-        // 页脚年份
-        const yearEl = document.getElementById("footer-year");
-        if (yearEl) {
-          yearEl.textContent = new Date().getFullYear().toString();
-        }
+        var yearEl = document.getElementById("footer-year");
+        if (yearEl) yearEl.textContent = new Date().getFullYear().toString();
 
         // 近期情况：极简列表
-        const highlightsList = document.querySelector(".highlights-list");
+        var highlightsList = document.querySelector(".highlights-list");
         if (highlightsList && Array.isArray(recentHighlights)) {
           highlightsList.innerHTML = "";
-          recentHighlights.forEach((item) => {
-            const li = document.createElement("li");
+          recentHighlights.forEach(function (item) {
+            var li = document.createElement("li");
             li.textContent = item.text || "";
             highlightsList.appendChild(li);
           });
         }
 
-        // 近期情况：时间线
-        const timelineEl = document.querySelector(".timeline");
+        // 近期情况：时间线（日期容错排序，非法日期沉底）
+        var timelineEl = document.querySelector(".timeline");
         if (timelineEl && Array.isArray(timelineEvents)) {
           timelineEl.innerHTML = "";
-          timelineEvents.forEach((event) => {
-            const item = document.createElement("div");
+          var sorted = timelineEvents.slice().sort(function (a, b) {
+            var ta = window.SiteMd.parseDateSafe(a.date), tb = window.SiteMd.parseDateSafe(b.date);
+            if (isNaN(ta) && isNaN(tb)) return 0;
+            if (isNaN(ta)) return 1;
+            if (isNaN(tb)) return -1;
+            return tb - ta;
+          });
+          sorted.forEach(function (event) {
+            var item = document.createElement("div");
             item.className = "timeline-item";
-
-            const dot = document.createElement("div");
+            var dot = document.createElement("div");
             dot.className = "timeline-dot";
-
-            const content = document.createElement("div");
+            dot.setAttribute("aria-hidden", "true");
+            var content = document.createElement("div");
             content.className = "timeline-content";
-
-            const dateEl = document.createElement("div");
+            var dateEl = document.createElement("div");
             dateEl.className = "timeline-date muted";
             dateEl.textContent = event.date || "";
-
-            const textEl = document.createElement("div");
+            var textEl = document.createElement("div");
             textEl.className = "timeline-text";
             textEl.textContent = event.text || "";
-
             content.appendChild(dateEl);
             content.appendChild(textEl);
             item.appendChild(dot);
@@ -222,71 +218,18 @@
           });
         }
 
-        // 最近文章：从 md 文件 front matter 自动读取
+        // 最近文章：site-data.js 已内置元数据，同步渲染零请求；旧数据回退到 fetch
         var postsGrid = document.getElementById("posts-grid");
-        var slugs = Array.isArray(posts) ? posts : [];
-        if (postsGrid && slugs.length > 0) {
-          function parseFrontMatter(text) {
-            var result = { meta: {}, body: text };
-            var match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
-            if (!match) return result;
-            for (var i = 0; i < match[1].split(/\r?\n/).length; i++) {
-              var line = match[1].split(/\r?\n/)[i];
-              var idx = line.indexOf(":");
-              if (idx === -1) continue;
-              var key = line.slice(0, idx).trim();
-              var val = line.slice(idx + 1).trim();
-              if (key) result.meta[key] = val;
-            }
-            result.body = text.slice(match[0].length);
-            return result;
-          }
-
-          Promise.all(
-            slugs.map(function (slug) {
-              return fetch("posts/md/" + slug + ".md")
-                .then(function (res) { return res.ok ? res.text() : ""; })
-                .then(function (text) {
-                  if (!text) return null;
-                  var m = parseFrontMatter(text);
-                  return { slug: slug, title: m.meta.title || slug, date: m.meta.date || "", summary: m.meta.summary || "" };
-                })
-                .catch(function () { return null; });
-            })
-          ).then(function (results) {
-            var postsData = results.filter(Boolean).sort(function (a, b) {
-              return new Date(b.date) - new Date(a.date);
-            });
-            postsGrid.innerHTML = "";
-            postsData.slice(0, 3).forEach(function (post) {
-              var article = document.createElement("article");
-              article.className = "card post-card";
-
-              var dateDiv = document.createElement("div");
-              dateDiv.className = "post-date muted";
-              dateDiv.textContent = post.date;
-
-              var titleH3 = document.createElement("h3");
-              titleH3.className = "post-title";
-              titleH3.textContent = post.title;
-
-              var summaryP = document.createElement("p");
-              summaryP.className = "post-summary";
-              summaryP.textContent = post.summary || "这篇文章暂时没有摘要描述。";
-
-              var linkA = document.createElement("a");
-              linkA.className = "post-link";
-              linkA.textContent = "阅读更多";
-              linkA.href = "posts/post.html?slug=" + encodeURIComponent(post.slug);
-
-              article.appendChild(dateDiv);
-              article.appendChild(titleH3);
-              article.appendChild(summaryP);
-              article.appendChild(linkA);
-              postsGrid.appendChild(article);
-            });
+        if (!postsGrid) return;
+        function renderTop(postsData) {
+          postsGrid.innerHTML = "";
+          postsData.slice(0, 3).forEach(function (post) {
+            postsGrid.appendChild(window.SitePosts.postCard(post, "posts/post.html?slug=", "h3"));
           });
         }
+        var sync = window.SitePosts.getSortedPostsSync();
+        if (sync) renderTop(sync);
+        else window.SitePosts.loadPostsMeta("posts/md/").then(renderTop);
       })();
     </script>
   </body>

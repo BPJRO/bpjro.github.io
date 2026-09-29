@@ -3,17 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>全部文章 - 🤗BPJRO的个人主页·续</title>
+    <title>全部文章 - BPJRO的个人主页</title>
+    <meta name="description" content="BPJRO 的全部文章列表。" />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title="BPJRO RSS" href="../feed.xml" />
     <link rel="stylesheet" href="../assets/css/style.css" />
   </head>
   <body>
+    <a class="skip-link" href="#posts-list">跳到文章列表</a>
     <header class="site-header">
       <div class="container header-inner">
         <div class="brand">
-          <span class="brand-mark"></span>
+          <span class="brand-mark" aria-hidden="true"></span>
           <a href="../index.html" class="brand-name">BPJRO</a>
         </div>
-        <nav class="nav">
+        <nav class="nav" aria-label="主导航">
           <a href="../index.html#about">关于我</a>
           <a href="../index.html#updates">近期情况</a>
           <a href="../index.html#posts">文章</a>
@@ -31,7 +35,7 @@
           </div>
 
           <div id="posts-list" class="posts-grid">
-            <!-- 将由脚本从数据文件渲染 -->
+            <noscript><p class="muted">启用 JavaScript 后可浏览文章列表。</p></noscript>
           </div>
         </div>
       </section>
@@ -46,80 +50,25 @@
     </footer>
 
     <script src="../data/site-data.js"></script>
+    <script src="../assets/js/markdown.js"></script>
+    <script src="../assets/js/site.js"></script>
     <script>
       (function () {
-        const yearEl = document.getElementById("footer-year");
-        if (yearEl) {
-          yearEl.textContent = new Date().getFullYear().toString();
-        }
+        var yearEl = document.getElementById("footer-year");
+        if (yearEl) yearEl.textContent = new Date().getFullYear().toString();
 
-        function parseFrontMatter(text) {
-          const result = { meta: {}, body: text };
-          const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
-          if (!match) return result;
-          for (const line of match[1].split(/\r?\n/)) {
-            const idx = line.indexOf(":");
-            if (idx === -1) continue;
-            const key = line.slice(0, idx).trim();
-            const val = line.slice(idx + 1).trim();
-            if (key) result.meta[key] = val;
-          }
-          result.body = text.slice(match[0].length);
-          return result;
-        }
-
-        const listEl = document.getElementById("posts-list");
-        const slugs = window.SITE_DATA && Array.isArray(window.SITE_DATA.posts)
-          ? window.SITE_DATA.posts
-          : [];
-
-        if (!listEl || slugs.length === 0) return;
-
-        Promise.all(
-          slugs.map(function (slug) {
-            return fetch("md/" + slug + ".md")
-              .then(function (res) { return res.ok ? res.text() : ""; })
-              .then(function (text) {
-                if (!text) return null;
-                var m = parseFrontMatter(text);
-                return { slug: slug, title: m.meta.title || slug, date: m.meta.date || "", summary: m.meta.summary || "" };
-              })
-              .catch(function () { return null; });
-          })
-        ).then(function (results) {
-          var posts = results.filter(Boolean).sort(function (a, b) {
-            return new Date(b.date) - new Date(a.date);
-          });
+        var listEl = document.getElementById("posts-list");
+        if (!listEl) return;
+        function render(posts) {
+          listEl.innerHTML = "";
           posts.forEach(function (post) {
-            var article = document.createElement("article");
-            article.className = "card post-card";
-
-            var dateDiv = document.createElement("div");
-            dateDiv.className = "post-date muted";
-            dateDiv.textContent = post.date;
-
-            var titleH2 = document.createElement("h2");
-            titleH2.className = "post-title";
-            titleH2.textContent = post.title;
-
-            var summaryP = document.createElement("p");
-            summaryP.className = "post-summary";
-            summaryP.textContent = post.summary || "这篇文章暂时没有摘要描述。";
-
-            var linkA = document.createElement("a");
-            linkA.className = "post-link";
-            linkA.textContent = "阅读更多";
-            linkA.href = "post.html?slug=" + encodeURIComponent(post.slug);
-
-            article.appendChild(dateDiv);
-            article.appendChild(titleH2);
-            article.appendChild(summaryP);
-            article.appendChild(linkA);
-            listEl.appendChild(article);
+            listEl.appendChild(window.SitePosts.postCard(post, "post.html?slug=", "h2"));
           });
-        });
+        }
+        var sync = window.SitePosts.getSortedPostsSync();
+        if (sync) render(sync);
+        else window.SitePosts.loadPostsMeta("md/").then(render);
       })();
     </script>
   </body>
 </html>
-

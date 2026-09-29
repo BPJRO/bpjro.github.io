@@ -1,0 +1,13 @@
+{
+  "name": "bpjro-homepage",
+  "private": true,
+  "version": "1.0.0",
+  "description": "BPJRO personal homepage (static, GitHub Pages)",
+  "scripts": {
+    "new": "node scripts/new-post.mjs",
+    "timeline": "node scripts/add-timeline.mjs",
+    "sync": "node scripts/sync.mjs",
+    "check": "node scripts/sync.mjs --check",
+    "preview": "npx serve ."
+  }
+}

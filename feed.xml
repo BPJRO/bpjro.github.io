@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>BPJRO的个人主页</title>
+<link>https://bpjro.github.io/</link>
+<description>BPJRO 最近文章</description>
+<language>zh-CN</language>
+<item><title>9月29日杂记</title><link>https://bpjro.github.io/posts/post.html?slug=post20260929</link><pubDate>Tue, 29 Sep 2026 00:00:00 GMT</pubDate><description>盼重置</description></item>
+<item><title>Markdown 格式测试</title><link>https://bpjro.github.io/posts/post.html?slug=md_format_test</link><pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate><description>测试新的Markdown解析功能</description></item>
+<item><title>3月11日杂记</title><link>https://bpjro.github.io/posts/post.html?slug=post20260311</link><pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate><description>随便写了点</description></item>
+<item><title>施工中</title><link>https://bpjro.github.io/posts/post.html?slug=post2</link><pubDate>Wed, 04 Mar 2026 00:00:00 GMT</pubDate><description>施工中的文章。打算回顾一下2017年以来有关个人主页的故事</description></item>
+<item><title>主页重建纪念</title><link>https://bpjro.github.io/posts/post.html?slug=post20260304</link><pubDate>Wed, 04 Mar 2026 00:00:00 GMT</pubDate><description>主页重建纪念的文章。</description></item>
+<item><title>一些小玩意</title><link>https://bpjro.github.io/posts/post.html?slug=post20210806_recall</link><pubDate>Fri, 06 Aug 2021 00:00:00 GMT</pubDate><description>为数不多旧主页能找到的文章，复刻在新主页。旧博客文章存档于2022年3月与其他存档文件一起被误删。</description></item>
+</channel>
+</rss>

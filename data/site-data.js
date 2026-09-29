@@ -15,6 +15,7 @@ const recentHighlights = [
 
 // 近期情况：时间线（按时间倒序书写更直观）
 const timelineEvents = [
+  { date: "2026-06-30", text: "第二份零工结束" },
   { date: "2026-03-11", text: "使用OpenCode + MiMo V2 Flash Free优化此主页" },
   { date: "2026-03-04", text: "使用Cursor搭建此主页并发布在Github Pages上" },
   { date: "2025-12-01", text: "第一份零工结束" },
@@ -22,13 +23,15 @@ const timelineEvents = [
   { date: "约2018-2020", text: "Fork别人做好的Jekyll模板试图搭建自己的Homepage，最终因Github Pages被GFW & Gitee Pages和谐化而倒闭" }
 ];
 
-// 文章列表：只需添加 slug，标题/日期/摘要从 md 文件的 front matter 自动读取
+// 文章列表：内置标题/日期/摘要，首页与列表页可直接同步渲染，无需逐个 fetch md。
+// 新增文章时：复制 posts/md 下的 md 文件，修改 front matter，再在此处加一行（保持倒序）。
 const posts = [
-  "post20260311",
-  "post20260304",
-  "post20210806_recall",
-  "post2",
-  "md_format_test"
+  { slug: "post20260929", title: "9月29日杂记", date: "2026-09-29", summary: "盼重置" },
+  { slug: "md_format_test", title: "Markdown 格式测试", date: "2026-03-11", summary: "测试新的Markdown解析功能" },
+  { slug: "post20260311", title: "3月11日杂记", date: "2026-03-11", summary: "随便写了点" },
+  { slug: "post2", title: "施工中", date: "2026-03-04", summary: "施工中的文章。打算回顾一下2017年以来有关个人主页的故事" },
+  { slug: "post20260304", title: "主页重建纪念", date: "2026-03-04", summary: "主页重建纪念的文章。" },
+  { slug: "post20210806_recall", title: "一些小玩意", date: "2021-08-06", summary: "为数不多旧主页能找到的文章，复刻在新主页。旧博客文章存档于2022年3月与其他存档文件一起被误删。" }
 ];
 
 // 暴露到全局，方便页面脚本访问

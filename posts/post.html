@@ -3,17 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>文章 - 🤗BPJRO的个人主页·续</title>
+    <title>文章 - BPJRO的个人主页</title>
+    <meta name="description" content="BPJRO 个人主页文章详情" />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="../assets/css/style.css" />
   </head>
   <body>
+    <a class="skip-link" href="#post-content">跳到正文</a>
     <header class="site-header">
       <div class="container header-inner">
         <div class="brand">
-          <span class="brand-mark"></span>
+          <span class="brand-mark" aria-hidden="true"></span>
           <a href="../index.html" class="brand-name">BPJRO</a>
         </div>
-        <nav class="nav">
+        <nav class="nav" aria-label="主导航">
           <a href="../index.html#about">关于我</a>
           <a href="../index.html#updates">近期情况</a>
           <a href="../index.html#posts">文章</a>
@@ -29,6 +32,7 @@
             <p id="post-date" class="post-date muted"></p>
             <h1 id="post-title" class="post-title">文章标题</h1>
             <div id="post-content" class="post-body"></div>
+            <noscript><p class="muted">此页需要启用 JavaScript 才能加载 Markdown 文章正文。</p></noscript>
 
             <div class="post-actions">
               <a href="../index.html" class="btn btn-ghost small"> 返回主页 </a>
@@ -47,236 +51,51 @@
       </div>
     </footer>
 
+    <script src="../assets/js/markdown.js"></script>
     <script>
       (function () {
-        const yearEl = document.getElementById("footer-year");
-        if (yearEl) {
-          yearEl.textContent = new Date().getFullYear().toString();
-        }
+        var yearEl = document.getElementById("footer-year");
+        if (yearEl) yearEl.textContent = new Date().getFullYear().toString();
 
         function getQueryParam(name) {
-          const params = new URLSearchParams(window.location.search);
-          return params.get(name);
-        }
-
-        function parseFrontMatter(markdown) {
-          const result = { meta: {}, body: markdown };
-          const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
-          if (!match) return result;
-          const yaml = match[1];
-          const lines = yaml.split(/\r?\n/);
-          for (const line of lines) {
-            const idx = line.indexOf(":");
-            if (idx === -1) continue;
-            const key = line.slice(0, idx).trim();
-            const val = line.slice(idx + 1).trim();
-            if (key) result.meta[key] = val;
-          }
-          result.body = markdown.slice(match[0].length);
-          return result;
-        }
-
-        function simpleMarkdownToHtml(markdown) {
-          if (!markdown) return "";
-          const lines = markdown.replace(/\r\n/g, "\n").split("\n");
-          const htmlLines = [];
-          let inCodeBlock = false;
-          let codeBlockContent = [];
-          let listLevelStack = []; // 用于跟踪嵌套列表层级
-
-          function closeCodeBlock() {
-            if (inCodeBlock) {
-              const code = codeBlockContent.join("\n");
-              htmlLines.push(`<pre><code>${escapeHtml(code)}</code></pre>`);
-              inCodeBlock = false;
-              codeBlockContent = [];
-            }
-          }
-
-          function closeListsUntilLevel(targetLevel) {
-            while (listLevelStack.length > 0 && listLevelStack[listLevelStack.length - 1] > targetLevel) {
-              htmlLines.push("</ul>");
-              listLevelStack.pop();
-            }
-          }
-
-          for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            const trimmedLine = line.trim();
-
-            // 代码块处理
-            if (trimmedLine.startsWith("```")) {
-              if (!inCodeBlock) {
-                closeListsUntilLevel(0); // 关闭所有列表
-                closeCodeBlock(); // just in case
-                inCodeBlock = true;
-              } else {
-                closeCodeBlock();
-              }
-              continue;
-            }
-
-            if (inCodeBlock) {
-              codeBlockContent.push(line);
-              continue;
-            }
-
-            if (!trimmedLine) {
-              closeListsUntilLevel(0); // 空行关闭所有列表
-              continue;
-            }
-
-            // 引用块
-            if (trimmedLine.startsWith("> ")) {
-              closeListsUntilLevel(0);
-              const quoteText = trimmedLine.substring(2);
-              htmlLines.push(`<blockquote>${inlineFormat(quoteText)}</blockquote>`);
-              continue;
-            }
-
-            // 标题
-            const hMatch = trimmedLine.match(/^(#{1,6})\s+(.*)$/);
-            if (hMatch) {
-              closeListsUntilLevel(0);
-              const level = hMatch[1].length;
-              const text = hMatch[2];
-              htmlLines.push(
-                `<h${level}>${inlineFormat(text)}</h${level}>`
-              );
-              continue;
-            }
-
-            // 无序列表（支持缩进）
-            const listMatch = line.match(/^(\s*)([-*])\s+(.*)$/);
-            if (listMatch) {
-              const indent = listMatch[1];
-              const listItemText = listMatch[3];
-              
-              // 计算列表层级：每2个空格为一个层级
-              const indentLevel = Math.floor(indent.length / 2) + 1;
-              const currentLevel = listLevelStack.length > 0 ? listLevelStack[listLevelStack.length - 1] : 0;
-              
-              // 如果当前层级大于栈顶层级，需要打开新的<ul>
-              if (indentLevel > currentLevel) {
-                htmlLines.push("<ul>");
-                listLevelStack.push(indentLevel);
-              } 
-              // 如果当前层级小于栈顶层级，需要关闭一些<ul>
-              else if (indentLevel < currentLevel) {
-                closeListsUntilLevel(indentLevel);
-              }
-              // 如果相等，不需要打开或关闭<ul>
-              
-              htmlLines.push(
-                `<li>${inlineFormat(listItemText)}</li>`
-              );
-              continue;
-            }
-
-            // 普通段落
-            closeListsUntilLevel(0);
-            htmlLines.push(`<p>${inlineFormat(trimmedLine)}</p>`);
-          }
-
-          closeListsUntilLevel(0);
-          closeCodeBlock();
-          return htmlLines.join("\n");
-        }
-
-        function escapeHtml(text) {
-          const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-          };
-          return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-        }
-
-        function inlineFormat(text) {
-          if (!text) return "";
-          let result = text;
-
-          // 图片 ![alt](src)
-          result = result.replace(
-            /!\[([^\]]*)\]\(([^)]+)\)/g,
-            '<img src="$2" alt="$1" style="max-width:100%; height:auto;">'
-          );
-
-          // 链接 [text](url)
-          result = result.replace(
-            /\[([^\]]+)\]\(([^)]+)\)/g,
-            '<a href="$2" target="_blank" rel="noopener">$1</a>'
-          );
-
-          // 粗体斜体 ***text***
-          result = result.replace(
-            /\*\*\*(.+?)\*\*\*/g,
-            "<strong><em>$1</em></strong>"
-          );
-
-          // 粗体 **text**
-          result = result.replace(
-            /\*\*(.+?)\*\*/g,
-            "<strong>$1</strong>"
-          );
-
-          // 星号斜体 *text*
-          result = result.replace(
-            /\*(.+?)\*/g,
-            "<em>$1</em>"
-          );
-
-          // 下划线斜体 _text_
-          result = result.replace(
-            /_(.+?)_/g,
-            "<em>$1</em>"
-          );
-
-          // 行内代码 `code`
-          result = result.replace(/`([^`]+)`/g, "<code>$1</code>");
-
-          return result;
+          try { return new URLSearchParams(window.location.search).get(name); }
+          catch (e) { return null; }
         }
 
         function loadPost() {
-          const slug = getQueryParam("slug");
-          const titleEl = document.getElementById("post-title");
-          const dateEl = document.getElementById("post-date");
-          const contentEl = document.getElementById("post-content");
+          var slug = (getQueryParam("slug") || "").trim();
+          // 仅允许字母数字/_/-，防路径穿越
+          if (slug && !/^[A-Za-z0-9_-]+$/.test(slug)) slug = "";
+          var titleEl = document.getElementById("post-title");
+          var dateEl = document.getElementById("post-date");
+          var contentEl = document.getElementById("post-content");
 
           if (!slug) {
             if (titleEl) titleEl.textContent = "未找到对应文章";
             if (dateEl) dateEl.textContent = "";
-            if (contentEl) {
-              contentEl.innerHTML =
-                "<p class='muted'>请检查链接是否正确，或稍后再试。</p>";
-            }
+            if (contentEl) contentEl.innerHTML = "<p class='muted'>请检查链接是否正确，或稍后再试。</p>";
             return;
           }
 
-          const mdPath = "md/" + slug + ".md";
-          fetch(mdPath)
-            .then((res) => (res.ok ? res.text() : ""))
-            .then((md) => {
+          fetch("md/" + slug + ".md")
+            .then(function (res) { return res.ok ? res.text() : ""; })
+            .then(function (md) {
               if (!contentEl) return;
               if (!md) {
                 titleEl.textContent = "未找到对应文章";
-                contentEl.innerHTML =
-                  "<p class='muted'>文章内容尚未准备好，请稍后再试。</p>";
+                contentEl.innerHTML = "<p class='muted'>文章内容尚未准备好，请稍后再试。</p>";
                 return;
               }
-              const { meta, body } = parseFrontMatter(md);
+              var parsed = window.SiteMd.parseFrontMatter(md);
+              var meta = parsed.meta, body = parsed.body;
               if (titleEl) titleEl.textContent = meta.title || slug;
               if (dateEl) dateEl.textContent = meta.date || "";
-              document.title = (meta.title || "文章") + " - 🤗BPJRO的个人主页·续";
-              contentEl.innerHTML = simpleMarkdownToHtml(body);
+              document.title = (meta.title || "文章") + " - BPJRO的个人主页";
+              contentEl.innerHTML = window.SiteMd.markdownToHtml(body);
             })
-            .catch(() => {
+            .catch(function () {
               if (!contentEl) return;
-              contentEl.innerHTML =
-                "<p class='muted'>加载文章内容时出现问题，请稍后再试。</p>";
+              contentEl.innerHTML = "<p class='muted'>加载文章内容时出现问题，请稍后再试。</p>";
             });
         }
 
@@ -285,4 +104,3 @@
     </script>
   </body>
 </html>
-
